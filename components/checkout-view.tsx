@@ -24,6 +24,7 @@ export default function CheckoutView({ cart, subtotal, tax, total, clearCart }: 
   const [paymentComplete, setPaymentComplete] = useState(false)
 
   const handleCheckout = () => {
+    console.log("Checkout clicked!") // Debug log
     // Simulate payment processing
     setPaymentComplete(true)
     // Clear the cart after successful payment

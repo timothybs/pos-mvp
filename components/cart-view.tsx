@@ -16,9 +16,12 @@ interface CartViewProps {
   updateQuantity: (productId: number, quantity: number) => void
   removeFromCart: (productId: number) => void
   subtotal: number
+  goToCheckout: () => void
 }
 
-export default function CartView({ cart, updateQuantity, removeFromCart, subtotal }: CartViewProps) {
+export default function CartView({ cart, updateQuantity, removeFromCart, subtotal, goToCheckout }: CartViewProps) {
+  console.log("Received goToCheckout prop:", goToCheckout);
+
   if (cart.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -86,7 +89,9 @@ export default function CartView({ cart, updateQuantity, removeFromCart, subtota
           <span className="font-medium">Subtotal:</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
-        <Button className="w-full">Proceed to Checkout</Button>
+        <Button className="w-full" onClick={goToCheckout}>
+          Proceed to Checkout
+        </Button>
       </div>
     </div>
   )

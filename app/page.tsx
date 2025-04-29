@@ -18,6 +18,7 @@ export default function PosApp() {
       image: string
     }[]
   >([])
+  const [activeTab, setActiveTab] = useState("products") // Track the active tab
 
   const addToCart = (product: { id: number; name: string; price: number; image: string }) => {
     setCart((prevCart) => {
@@ -47,6 +48,11 @@ export default function PosApp() {
     setCart([])
   }
 
+  const goToCheckout = () => {
+    console.log("Navigating to checkout...")
+    setActiveTab("checkout") // Switch to the "checkout" tab
+  }
+
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const tax = subtotal * 0.08 // 8% tax
   const total = subtotal + tax
@@ -60,7 +66,7 @@ export default function PosApp() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="products" className="flex-1 flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <TabsList className="grid grid-cols-3 sticky top-0 z-10">
             <TabsTrigger value="products">
               <Home className="h-4 w-4 mr-2" />
@@ -81,7 +87,13 @@ export default function PosApp() {
           </TabsContent>
 
           <TabsContent value="cart" className="flex-1 overflow-auto p-4">
-            <CartView cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} subtotal={subtotal} />
+            <CartView
+              cart={cart}
+              updateQuantity={updateQuantity}
+              removeFromCart={removeFromCart}
+              subtotal={subtotal}
+              goToCheckout={goToCheckout} // Pass the goToCheckout function
+            />
           </TabsContent>
 
           <TabsContent value="checkout" className="flex-1 overflow-auto p-4">
