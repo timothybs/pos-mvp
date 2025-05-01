@@ -9,3 +9,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const token = await stripe.terminal.connectionTokens.create()
   res.status(200).json({ secret: token.secret })
 }
+
+//test
