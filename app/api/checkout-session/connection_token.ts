@@ -6,8 +6,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const token = await stripe.terminal.connectionTokens.create()
-  res.status(200).json({ secret: token.secret })
-}
+  console.log("🚀 HIT /connection_token")
 
-//test
+  try {
+    const token = await stripe.terminal.connectionTokens.create()
+    res.status(200).json({ secret: token.secret })
+  } catch (error) {
+    console.error("❌ Error creating token:", error)
+    res.status(500).json({ error: "Failed to create connection token" })
+  }
+}
