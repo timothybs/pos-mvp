@@ -5,10 +5,18 @@ import Stripe from "stripe"
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-04-30.basil", // adjust based on current support
 })
-
+console.log("💡 Stripe running in", process.env.STRIPE_SECRET_KEY?.startsWith("sk_live") ? "LIVE" : "TEST", "mode");
+console.log("📍 Using location ID:", process.env.STRIPE_LOCATION_ID);
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { amount, currency = "usd" } = body
+  let body = {}
+
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: "Invalid or missing JSON body" }, { status: 400 })
+  }
+
+  const { amount = 30, currency = "gbp" } = body as { amount?: number; currency?: string }
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
@@ -21,6 +29,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ client_secret: paymentIntent.client_secret })
   } catch (err: any) {
     console.error("Failed to create payment intent:", err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ error: err.message ?? "Stripe error" }, { status: 500 })
   }
 }

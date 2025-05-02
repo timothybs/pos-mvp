@@ -5,7 +5,7 @@ import Stripe from "stripe"
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-04-30.basil", // Use a stable supported version
 })
-
+console.log("💡 Stripe running in", process.env.STRIPE_SECRET_KEY?.startsWith("sk_live") ? "LIVE" : "TEST", "mode");
 export async function POST(req: NextRequest) {
   const body = await req.json()
   const { payment_intent_id } = body
