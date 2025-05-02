@@ -15,24 +15,28 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const confirmedIntent = await stripe.paymentIntents.confirm(payment_intent_id)
-    console.log("✅ PaymentIntent confirmed:", confirmedIntent.id)
+    const intent = await stripe.paymentIntents.retrieve(payment_intent_id)
+    console.log("👉 Retrieved intent status:", intent.status)
 
-    console.log("👉 Status after confirmation:", confirmedIntent.status)
-
-    if (confirmedIntent.status === 'requires_capture') {
-      const capturedIntent = await stripe.paymentIntents.capture(payment_intent_id)
-      console.log("💰 PaymentIntent captured:", capturedIntent.id)
-      return NextResponse.json({ status: "captured", intent: capturedIntent })
+    if (intent.status === 'requires_capture') {
+      const captured = await stripe.paymentIntents.capture(payment_intent_id)
+      console.log("💰 Captured from retrieved intent:", captured.id)
+      return NextResponse.json({ status: "captured", intent: captured })
     }
 
-    // Fallback for debugging
-    try {
-      const capturedIntent = await stripe.paymentIntents.capture(payment_intent_id)
-      console.log("💰 [Fallback] Captured anyway:", capturedIntent.id)
-      return NextResponse.json({ status: "captured", intent: capturedIntent })
-    } catch (err) {
-      console.error("❌ Capture failed in fallback:", err.message)
+    if (intent.status !== 'requires_confirmation') {
+      return NextResponse.json({
+        error: `Cannot confirm intent in status ${intent.status}`,
+      }, { status: 400 })
+    }
+
+    const confirmedIntent = await stripe.paymentIntents.confirm(payment_intent_id)
+    console.log("✅ Confirmed intent:", confirmedIntent.id)
+
+    if (confirmedIntent.status === 'requires_capture') {
+      const captured = await stripe.paymentIntents.capture(payment_intent_id)
+      console.log("💰 Captured after confirmation:", captured.id)
+      return NextResponse.json({ status: "captured", intent: captured })
     }
 
     return NextResponse.json({ status: "confirmed", intent: confirmedIntent })
