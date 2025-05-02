@@ -18,7 +18,13 @@ export async function POST(req: NextRequest) {
     const confirmedIntent = await stripe.paymentIntents.confirm(payment_intent_id)
     console.log("✅ PaymentIntent confirmed:", confirmedIntent.id)
 
-    return NextResponse.json({ status: "success", intent: confirmedIntent })
+    if (confirmedIntent.status === 'requires_capture') {
+      const capturedIntent = await stripe.paymentIntents.capture(payment_intent_id)
+      console.log("💰 PaymentIntent captured:", capturedIntent.id)
+      return NextResponse.json({ status: "captured", intent: capturedIntent })
+    }
+
+    return NextResponse.json({ status: "confirmed", intent: confirmedIntent })
   } catch (err: any) {
     console.error("❌ Failed to confirm PaymentIntent:", err.message)
     return NextResponse.json({ error: err.message }, { status: 500 })
