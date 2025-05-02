@@ -18,10 +18,21 @@ export async function POST(req: NextRequest) {
     const confirmedIntent = await stripe.paymentIntents.confirm(payment_intent_id)
     console.log("✅ PaymentIntent confirmed:", confirmedIntent.id)
 
+    console.log("👉 Status after confirmation:", confirmedIntent.status)
+
     if (confirmedIntent.status === 'requires_capture') {
       const capturedIntent = await stripe.paymentIntents.capture(payment_intent_id)
       console.log("💰 PaymentIntent captured:", capturedIntent.id)
       return NextResponse.json({ status: "captured", intent: capturedIntent })
+    }
+
+    // Fallback for debugging
+    try {
+      const capturedIntent = await stripe.paymentIntents.capture(payment_intent_id)
+      console.log("💰 [Fallback] Captured anyway:", capturedIntent.id)
+      return NextResponse.json({ status: "captured", intent: capturedIntent })
+    } catch (err) {
+      console.error("❌ Capture failed in fallback:", err.message)
     }
 
     return NextResponse.json({ status: "confirmed", intent: confirmedIntent })
