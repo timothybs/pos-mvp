@@ -22,6 +22,9 @@ export async function POST(req: NextRequest) {
     stripeAccount?: string
   }
 
+  console.log("💰 Creating payment intent for amount:", amount, currency)
+  console.log("🏦 Using connected Stripe account:", stripeAccount)
+
   if (!stripeAccount) {
     return NextResponse.json({ error: "Missing stripeAccount in request body" }, { status: 400 })
   }
@@ -39,9 +42,11 @@ export async function POST(req: NextRequest) {
       }
     )
 
+    console.log("✅ Payment intent created:", paymentIntent)
+
     return NextResponse.json({ client_secret: paymentIntent.client_secret })
   } catch (err: any) {
-    console.error("Failed to create payment intent:", err)
+    console.error("❌ Failed to create payment intent:", JSON.stringify(err, null, 2))
     return NextResponse.json({ error: err.message ?? "Stripe error" }, { status: 500 })
   }
 }
