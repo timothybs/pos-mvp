@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   }
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY!;
-  const FROM_EMAIL = "receipts@yourdomain.com"; // Replace with a verified sender domain
+  const FROM_EMAIL = "receipts@tim.bs"; // Replace with a verified sender domain
 
   const message = `
     Thanks for your payment!
