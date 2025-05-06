@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       {
         amount,
         currency,
-        payment_method_types: ["bank_transfer"],
+        payment_method_types: ["pay_by_bank"],
         payment_method_options: {
           bank_transfer: {}
         },
