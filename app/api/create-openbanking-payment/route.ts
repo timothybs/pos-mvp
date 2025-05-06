@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       client_secret: intent.client_secret,
       intent,
+      redirect_url: intent.next_action?.redirect_to_url?.url || null
     });
   } catch (error) {
     console.error("❌ Open Banking intent creation error:", error);
