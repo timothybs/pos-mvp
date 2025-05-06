@@ -23,18 +23,16 @@ export async function POST(request: NextRequest) {
     }
 
     const intent = await stripe.paymentIntents.create(
-      {
-        amount,
-        currency,
-        payment_method_types: ["pay_by_bank"],
-        payment_method_options: {
-          bank_transfer: {}
+        {
+          amount,
+          currency,
+          payment_method_types: ["pay_by_bank"],
+          confirmation_method: "automatic",
+          confirm: true,
+          return_url: "https://example.com/return", // required to get next_action
         },
-      } as Stripe.PaymentIntentCreateParams,
-      {
-        stripeAccount,
-      }
-    );
+        { stripeAccount }
+      );
 
     console.log("🔎 intent.status:", intent.status);
     console.log("🔎 intent.next_action:", intent.next_action);    
