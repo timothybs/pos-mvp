@@ -50,6 +50,9 @@ async function verifyAndExtractStripeAccount(token: string): Promise<string | nu
       .eq('user_id', userId)
       .single()
 
+      console.log("🧾 Supabase response — data:", data)
+      console.log("🧾 Supabase response — error:", error)
+
     if (error) {
       console.error("❌ Supabase merchant fetch error:", error)
       return null
