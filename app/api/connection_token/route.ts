@@ -31,8 +31,33 @@ export async function POST(req: Request) {
   }
 }
 
-// Dummy implementation — replace with real JWT verification as needed
+import { createClient } from '@supabase/supabase-js'
+import jwt from 'jsonwebtoken'
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
 async function verifyAndExtractStripeAccount(token: string): Promise<string | null> {
-  // TODO: implement proper validation; currently just returns a fixed value for testing
-  return process.env.STRIPE_ACCOUNT_ID || null
+  try {
+    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!) as { sub: string }
+    const userId = decoded.sub
+
+    const { data, error } = await supabase
+      .from('merchants')
+      .select('stripe_account_id')
+      .eq('user_id', userId)
+      .single()
+
+    if (error) {
+      console.error("❌ Supabase merchant fetch error:", error)
+      return null
+    }
+
+    return data?.stripe_account_id || null
+  } catch (err) {
+    console.error("❌ JWT verification failed:", err)
+    return null
+  }
 }
