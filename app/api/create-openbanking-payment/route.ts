@@ -28,9 +28,7 @@ export async function POST(request: NextRequest) {
         currency,
         payment_method_types: ["bank_transfer"],
         payment_method_options: {
-          bank_transfer: {
-            type: "gb_bank_transfer",
-          },
+          bank_transfer: {}
         },
       } as Stripe.PaymentIntentCreateParams,
       {
