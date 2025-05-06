@@ -36,6 +36,9 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    console.log("🔎 intent.status:", intent.status);
+    console.log("🔎 intent.next_action:", intent.next_action);    
+
     return NextResponse.json({
       client_secret: intent.client_secret,
       intent,
