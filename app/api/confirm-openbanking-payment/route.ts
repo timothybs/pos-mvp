@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     const confirmed = await stripe.paymentIntents.confirm(payment_intent_id, {
+      payment_method_data: { type: "pay_by_bank" },
       return_url: "https://example.com/return"
     }, { stripeAccount });
 
