@@ -1,4 +1,3 @@
-// filepath: /Users/timothysumner/Documents/pos-mvp/pos-mvp/app/api/checkout-session/route.ts
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 
@@ -7,27 +6,33 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
 })
 
 export async function POST(req: Request) {
-  const { cart } = await req.json()
+  const { cart, stripeAccount } = await req.json()
 
-  // Map cart items to Stripe line items
+  if (!stripeAccount) {
+    return NextResponse.json({ error: "Missing stripeAccount in request body" }, { status: 400 })
+  }
+
   const lineItems = cart.map((item: any) => ({
     price_data: {
       currency: "usd",
       product_data: {
         name: item.name,
       },
-      unit_amount: Math.round(item.price * 100), // Convert to cents
+      unit_amount: Math.round(item.price * 100),
     },
     quantity: item.quantity,
   }))
 
   try {
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "pay_by_bank_transfer"] as unknown as Stripe.Checkout.SessionCreateParams.PaymentMethodType[],
+      payment_method_collection: "always",
       line_items: lineItems,
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cancel`,
+    }, {
+      stripeAccount,
     })
 
     return NextResponse.json({ url: session.url })

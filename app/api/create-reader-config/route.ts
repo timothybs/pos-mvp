@@ -7,7 +7,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   try {
-    const config = await stripe.terminal.configurations.create({});
+    const { stripeAccount } = await req.json();
+
+    if (!stripeAccount) {
+      return NextResponse.json({ error: "Missing stripeAccount in request body" }, { status: 400 });
+    }
+
+    const config = await stripe.terminal.configurations.create({}, {
+      stripeAccount,
+    });
 
     return NextResponse.json({ configuration: config });
   } catch (err: any) {

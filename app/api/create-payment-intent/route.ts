@@ -16,15 +16,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid or missing JSON body" }, { status: 400 })
   }
 
-  const { amount = 30, currency = "gbp" } = body as { amount?: number; currency?: string }
+  const { amount = 30, currency = "gbp", stripeAccount } = body as {
+    amount?: number
+    currency?: string
+    stripeAccount?: string
+  }
+
+  if (!stripeAccount) {
+    return NextResponse.json({ error: "Missing stripeAccount in request body" }, { status: 400 })
+  }
 
   try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency,
-      capture_method: "manual", // required for Stripe Terminal
-      payment_method_types: ["card_present"],
-    })
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount,
+        currency,
+        capture_method: "manual", // required for Stripe Terminal
+        payment_method_types: ["card_present"],
+      },
+      {
+        stripeAccount,
+      }
+    )
 
     return NextResponse.json({ client_secret: paymentIntent.client_secret })
   } catch (err: any) {

@@ -8,18 +8,22 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 console.log("💡 Stripe running in", process.env.STRIPE_SECRET_KEY?.startsWith("sk_live") ? "LIVE" : "TEST", "mode");
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { payment_intent_id } = body
+  const { payment_intent_id, stripeAccount } = body
 
   if (!payment_intent_id) {
     return NextResponse.json({ error: "Missing payment_intent_id" }, { status: 400 })
   }
 
+  if (!stripeAccount) {
+    return NextResponse.json({ error: "Missing stripeAccount" }, { status: 400 })
+  }
+
   try {
-    const intent = await stripe.paymentIntents.retrieve(payment_intent_id)
+    const intent = await stripe.paymentIntents.retrieve(payment_intent_id, { stripeAccount })
     console.log("👉 Retrieved intent status:", intent.status)
 
     if (intent.status === 'requires_capture') {
-      const captured = await stripe.paymentIntents.capture(payment_intent_id)
+      const captured = await stripe.paymentIntents.capture(payment_intent_id, { stripeAccount })
       console.log("💰 Captured from retrieved intent:", captured.id)
       return NextResponse.json({ status: "captured", intent: captured })
     }
@@ -30,11 +34,11 @@ export async function POST(req: NextRequest) {
       }, { status: 400 })
     }
 
-    const confirmedIntent = await stripe.paymentIntents.confirm(payment_intent_id)
+    const confirmedIntent = await stripe.paymentIntents.confirm(payment_intent_id, { stripeAccount })
     console.log("✅ Confirmed intent:", confirmedIntent.id)
 
     if (confirmedIntent.status === 'requires_capture') {
-      const captured = await stripe.paymentIntents.capture(payment_intent_id)
+      const captured = await stripe.paymentIntents.capture(payment_intent_id, { stripeAccount })
       console.log("💰 Captured after confirmation:", captured.id)
       return NextResponse.json({ status: "captured", intent: captured })
     }
