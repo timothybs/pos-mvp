@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
+import Stripe from 'stripe'
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -28,12 +29,40 @@ export async function GET(req: Request) {
 
   const { data: merchant, error } = await supabase
     .from('merchants')
-    .select('*')
+    .select('id, stripe_account_id, terminal_location_id')
     .eq('user_id', userId)
     .single()
 
   if (error || !merchant) {
     return NextResponse.json({ error: 'Merchant not found' }, { status: 404 })
+  }
+
+  // Check if terminal_location_id is missing, create if necessary
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2025-04-30.basil'
+  })
+
+  if (!merchant.terminal_location_id) {
+    const location = await stripe.terminal.locations.create({
+      display_name: "Default Location",
+      address: {
+        line1: "123 Main St",
+        city: "London",
+        country: "GB",
+        postal_code: "W1A 1AA"
+      }
+    }, {
+      stripeAccount: merchant.stripe_account_id
+    })
+
+    const { error: updateError } = await supabase
+      .from('merchants')
+      .update({ terminal_location_id: location.id })
+      .eq('id', merchant.id)
+
+    if (!updateError) {
+      merchant.terminal_location_id = location.id
+    }
   }
 
   return NextResponse.json(merchant)
