@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 
   const { data: merchant, error } = await supabase
     .from('merchants')
-    .select('id, stripe_account_id, terminal_location_id')
+    .select('id, stripe_account_id, terminal_location_id, user_id, status, settings')
     .eq('user_id', userId)
     .single()
 
