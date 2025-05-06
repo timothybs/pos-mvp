@@ -27,9 +27,7 @@ export async function POST(request: NextRequest) {
           amount,
           currency,
           payment_method_types: ["pay_by_bank"],
-          confirmation_method: "automatic",
-          confirm: true,
-          return_url: "https://example.com/return", // required to get next_action
+          return_url: "https://example.com/return"
         },
         { stripeAccount }
       );
