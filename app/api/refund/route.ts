@@ -9,6 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log("🛠️ Incoming refund request:", body);
     const { payment_intent_id } = body;
 
     if (!payment_intent_id) {
