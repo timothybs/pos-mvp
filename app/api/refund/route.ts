@@ -12,14 +12,20 @@ export async function POST(req: NextRequest) {
     console.log("🛠️ Incoming refund request:", body);
     const balance = await stripe.balance.retrieve();
     console.log("🔍 Stripe account balance test:", balance);
-    const { payment_intent_id } = body;
+    const { payment_intent_id, connected_account_id } = body;
 
     if (!payment_intent_id) {
       return NextResponse.json({ error: 'Missing payment_intent_id' }, { status: 400 });
     }
 
+    if (!connected_account_id) {
+      return NextResponse.json({ error: 'Missing connected_account_id' }, { status: 400 });
+    }
+
     const refund = await stripe.refunds.create({
       payment_intent: payment_intent_id,
+    }, {
+      stripeAccount: connected_account_id,
     });
 
     console.log('✅ Refund created:', refund.id);
