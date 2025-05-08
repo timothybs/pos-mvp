@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     console.log("🛠️ Incoming refund request:", body);
     const balance = await stripe.balance.retrieve();
     console.log("🔍 Stripe account balance test:", balance);
-    const { payment_intent_id, stripe_account_id } = body;
+    const { payment_intent_id, stripe_account_id, amount } = body;
 
     if (!payment_intent_id) {
       return NextResponse.json({ error: 'Missing payment_intent_id' }, { status: 400 });
@@ -22,8 +22,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing stripe_account_id' }, { status: 400 });
     }
 
+    if (typeof amount !== 'number' || amount <= 0) {
+      return NextResponse.json({ error: 'Invalid or missing amount' }, { status: 400 });
+    }
+
     const refund = await stripe.refunds.create({
       payment_intent: payment_intent_id,
+      amount: amount,
     }, {
       stripeAccount: stripe_account_id,
     });
